@@ -1,0 +1,9 @@
+import React from 'react';
+
+const Filter = ({searchName, handleSearchChange}) => (
+  <div>
+    filter shown with <input value={searchName} onChange={handleSearchChange} />
+  </div>
+)
+
+export default Filter
