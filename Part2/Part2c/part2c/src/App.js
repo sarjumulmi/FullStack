@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import axios from 'axios'
+import personService from './service'
 
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
+import Button from './Button'
+import service from './service';
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -12,10 +14,13 @@ const App = () => {
   const [searchName, setSearchName] = useState('')
   const [searchPerson, setSearchPerson] = useState({})
 
-  useEffect(async () => {
-    const resp = await axios.get('http://localhost:3001/persons')
-    setPersons(resp.data)
-  }, persons)
+  useEffect(() => {
+    async function fetchPersons () {
+      const resp = await personService.getAllPersons()
+      setPersons(resp)
+    }
+    fetchPersons()
+  }, [])
 
   const handleNameChange = evt => {
     setNewName(evt.target.value)
@@ -26,9 +31,10 @@ const App = () => {
   }
 
   const handleSearchChange = evt => {
-    setSearchName(evt.target.value)
+    const value = evt.target.value
+    setSearchName(value)
     console.log('searched name', searchName);
-    const searchedPerson  = [...persons].filter(person => person.name.toLowerCase().includes(evt.target.value.toLowerCase()))
+    const searchedPerson  = [...persons].filter(person => person.name.toLowerCase().includes(value.toLowerCase()))
     console.log('searched Person', searchedPerson);
     if (searchedPerson !== undefined) {
       setSearchPerson(searchedPerson)
@@ -39,14 +45,34 @@ const App = () => {
 
   const handleFormSubmit = evt => {
     evt.preventDefault()
-    const personExists = persons.some(person => person.name === newName)
-    if (personExists) {
-      alert(`${newName} is already added to phonebook`)
-      return
+    const personExists = persons.find(person => person.name === newName)
+    if (personExists && window.confirm(`${newName} already exists, update phonebook with new number?`)) {
+      service.updatePerson({name: newName, number: number}, personExists.id)
+        .then(updatedPerson => {
+          setPersons([...persons.map(p => personExists.id === p.id ? updatedPerson : p )])
+          setNewName('')
+          setNumber('')
+        })
+    } else {
+      service.createPerson({name: newName, number: number})
+        .then(newPerson => {
+          setPersons([...persons, newPerson])
+          setNewName('')
+          setNumber('')
+    }) 
     }
-    setPersons([...persons, {name: newName, number: number}])
-    setNewName('')
-    setNumber('')
+    
+  }
+
+  const deletePerson = id => {
+    const personToDelete = persons.find(person => person.id === id)
+    if (window.confirm(`Delete ${personToDelete.name}?`)) {
+      console.log(id);
+      service.deletePerson(id)
+      .then(() => {
+        setPersons([...persons.filter(p => p.id !== id)])
+      })
+    }
   }
 
   const personsToDisplay = () => {
@@ -55,6 +81,7 @@ const App = () => {
         persons.map(person => (
           <div key={person.name}>
           {person.name} {person.number}
+          <Button text="delete" handleClick={()=>{deletePerson(person.id)}}/>
           </div>
       ))
       )
@@ -64,6 +91,7 @@ const App = () => {
         searchPerson.map(person => (
           <div key={person.name}>
           {person.name} {person.number}
+          <Button text="delete" handleClick={()=>{deletePerson(person.id)}}/>
           </div>
         )
       ))
