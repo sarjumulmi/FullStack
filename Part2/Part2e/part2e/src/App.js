@@ -72,7 +72,16 @@ const App = () => {
           setTimeout(() => {
             setMessage(null)
           }, 5000)
-    }) 
+        })
+        .catch(err => {
+          console.log(err.response);
+          setMessage({text:`${err.response.data.error}`, type: 'error'})
+          setNewName('')
+          setNumber('')
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
+        })
     }
   }
 
