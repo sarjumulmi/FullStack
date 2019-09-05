@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 
 const Persons = ({personsToDisplay}) => (
-  personsToDisplay()
+  <Fragment>{personsToDisplay()}</Fragment>
+  
 ) 
 
 export default Persons

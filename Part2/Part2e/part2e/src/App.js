@@ -12,7 +12,7 @@ import './index.css'
 
 const App = () => {
   const [persons, setPersons] = useState([])
-  const [ newName, setNewName ] = useState('')
+  const [newName, setNewName ] = useState('')
   const [number, setNumber] = useState('')
   const [searchName, setSearchName] = useState('')
   const [searchPerson, setSearchPerson] = useState({})
